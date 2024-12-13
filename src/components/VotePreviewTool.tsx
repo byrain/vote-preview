@@ -9,6 +9,7 @@ interface VoteData {
 interface GroupVotes {
     group1: VoteData;
     group2: VoteData;
+    group3: VoteData;
 }
 
 interface ChartData {
@@ -22,7 +23,8 @@ interface ChartData {
 const VotePreviewTool: React.FC = () => {
     const [votes, setVotes] = useState<GroupVotes>({
         group1: { juryVotes: null, audienceVotes: null },
-        group2: { juryVotes: null, audienceVotes: null }
+        group2: { juryVotes: null, audienceVotes: null },
+        group3: { juryVotes: null, audienceVotes: null }
     });
 
     const parseInputValue = (value: string): number | null => {
@@ -60,21 +62,23 @@ const VotePreviewTool: React.FC = () => {
     const calculateData = (): ChartData[] => {
         const maxJuryVotes = Math.max(
             votes.group1.juryVotes ?? 0,
-            votes.group2.juryVotes ?? 0
+            votes.group2.juryVotes ?? 0,
+            votes.group3.juryVotes ?? 0
         );
         const maxAudienceVotes = Math.max(
             votes.group1.audienceVotes ?? 0,
-            votes.group2.audienceVotes ?? 0
+            votes.group2.audienceVotes ?? 0,
+            votes.group3.audienceVotes ?? 0
         );
 
-        return ['group1', 'group2'].map(group => {
+        return ['group1', 'group2', 'group3'].map(group => {
             const currentGroup = votes[group as keyof GroupVotes];
             const juryScore = calculateJuryScore(currentGroup.juryVotes, maxJuryVotes);
             const audienceScore = calculateAudienceScore(currentGroup.audienceVotes, maxAudienceVotes);
             const totalScore = juryScore + audienceScore;
 
             return {
-                name: group === 'group1' ? '参赛组1' : '参赛组2',
+                name: group === 'group1' ? '参赛组1' : group === 'group2' ? '参赛组2' : '参赛组3',
                 总分: parseFloat(totalScore.toFixed(2)),
                 评委得分: parseFloat(juryScore.toFixed(2)),
                 观众得分: parseFloat(audienceScore.toFixed(2)),
@@ -85,8 +89,16 @@ const VotePreviewTool: React.FC = () => {
 
     const renderCalculationDetails = () => {
         const data = calculateData();
-        const maxJuryVotes = Math.max(votes.group1.juryVotes ?? 0, votes.group2.juryVotes ?? 0);
-        const maxAudienceVotes = Math.max(votes.group1.audienceVotes ?? 0, votes.group2.audienceVotes ?? 0);
+        const maxJuryVotes = Math.max(
+            votes.group1.juryVotes ?? 0,
+            votes.group2.juryVotes ?? 0,
+            votes.group3.juryVotes ?? 0
+        );
+        const maxAudienceVotes = Math.max(
+            votes.group1.audienceVotes ?? 0,
+            votes.group2.audienceVotes ?? 0,
+            votes.group3.audienceVotes ?? 0
+        );
 
         return data.map((group, index) => (
             <div key={group.name} className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
@@ -126,7 +138,7 @@ const VotePreviewTool: React.FC = () => {
 
     return (
         <div className="p-4">
-            <div className="mb-8 grid grid-cols-2 gap-4">
+            <div className="mb-8 grid grid-cols-3 gap-4">
                 <div className="space-y-4">
                     <h3 className="font-bold text-lg">参赛组1</h3>
                     <div>
@@ -205,12 +217,51 @@ const VotePreviewTool: React.FC = () => {
                         />
                     </div>
                 </div>
+                <div className="space-y-4">
+                    <h3 className="font-bold text-lg">参赛组3</h3>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">评委投票 (0-70)</label>
+                        <input
+                            type="text"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            value={votes.group3.juryVotes === null ? '' : votes.group3.juryVotes}
+                            onChange={(e) => {
+                                const value = parseInputValue(e.target.value);
+                                if (value === null || (value >= 0 && value <= 70)) {
+                                    setVotes({
+                                        ...votes,
+                                        group3: { ...votes.group3, juryVotes: value }
+                                    });
+                                }
+                            }}
+                            placeholder="请输入0-70之间的数值"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">观众投票 (0-120)</label>
+                        <input
+                            type="text"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            value={votes.group3.audienceVotes === null ? '' : votes.group3.audienceVotes}
+                            onChange={(e) => {
+                                const value = parseInputValue(e.target.value);
+                                if (value === null || (value >= 0 && value <= 120)) {
+                                    setVotes({
+                                        ...votes,
+                                        group3: { ...votes.group3, audienceVotes: value }
+                                    });
+                                }
+                            }}
+                            placeholder="请输入0-120之间的数值"
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className="space-y-8">
                 <div>
-                    <h3 className="font-bold text-lg mb-4">得分图表(不在前端呈现)</h3>
-                    <BarChart width={600} height={400} data={calculateData()}
+                    <h3 className="font-bold text-lg mb-4">得分图表</h3>
+                    <BarChart width={800} height={400} data={calculateData()}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
@@ -229,7 +280,7 @@ const VotePreviewTool: React.FC = () => {
 
                 <div>
                     <h3 className="font-bold text-lg mb-4">显示高度预览</h3>
-                    <BarChart width={600} height={400} data={calculateData()}
+                    <BarChart width={800} height={400} data={calculateData()}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
