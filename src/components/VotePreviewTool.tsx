@@ -2,36 +2,40 @@ import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
 
 interface VoteData {
-    group1: {
-        juryVotes: number;
-        audienceVotes: number;
-    };
-    group2: {
-        juryVotes: number;
-        audienceVotes: number;
-    };
+    juryVotes: number;
+    audienceVotes: number;
+}
+
+interface GroupVotes {
+    group1: VoteData;
+    group2: VoteData;
+}
+
+interface ChartData {
+    name: string;
+    总分: number;
+    评委得分: number;
+    观众得分: number;
+    显示高度: number;
 }
 
 const VotePreviewTool: React.FC = () => {
-    const [votes, setVotes] = useState({
+    const [votes, setVotes] = useState<GroupVotes>({
         group1: { juryVotes: 0, audienceVotes: 0 },
         group2: { juryVotes: 0, audienceVotes: 0 },
     });
 
-    // 计算评委得分
-    const calculateJuryScore = (juryVotes, maxJuryVotes) => {
+    const calculateJuryScore = (juryVotes: number, maxJuryVotes: number): number => {
         if (maxJuryVotes === 0) return 14;
         return 14 + 56 * (juryVotes / 70) * (Math.log(1 + juryVotes) / Math.log(1 + maxJuryVotes));
     };
 
-    // 计算观众得分
-    const calculateAudienceScore = (audienceVotes, maxAudienceVotes) => {
+    const calculateAudienceScore = (audienceVotes: number, maxAudienceVotes: number): number => {
         if (maxAudienceVotes === 0) return 6;
         return 6 + 24 * (audienceVotes / 120) * (Math.log(1 + audienceVotes) / Math.log(1 + maxAudienceVotes));
     };
 
-    // 计算显示高度
-    const calculateHeight = (score) => {
+    const calculateHeight = (score: number): number => {
         let extraHeight = 0;
 
         if (score >= 20 && score < 60) {
@@ -47,14 +51,14 @@ const VotePreviewTool: React.FC = () => {
         return 0.2 + extraHeight;
     };
 
-    // 计算总分数据
-    const calculateData = () => {
+    const calculateData = (): ChartData[] => {
         const maxJuryVotes = Math.max(votes.group1.juryVotes, votes.group2.juryVotes);
         const maxAudienceVotes = Math.max(votes.group1.audienceVotes, votes.group2.audienceVotes);
 
-        const groups = ['group1', 'group2'].map(group => {
-            const juryScore = calculateJuryScore(votes[group].juryVotes, maxJuryVotes);
-            const audienceScore = calculateAudienceScore(votes[group].audienceVotes, maxAudienceVotes);
+        return ['group1', 'group2'].map(group => {
+            const currentGroup = votes[group as keyof GroupVotes];
+            const juryScore = calculateJuryScore(currentGroup.juryVotes, maxJuryVotes);
+            const audienceScore = calculateAudienceScore(currentGroup.audienceVotes, maxAudienceVotes);
             const totalScore = juryScore + audienceScore;
 
             return {
@@ -65,8 +69,6 @@ const VotePreviewTool: React.FC = () => {
                 显示高度: calculateHeight(totalScore) * 100
             };
         });
-
-        return groups;
     };
 
     return (
