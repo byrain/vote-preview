@@ -89,10 +89,10 @@ const VotePreviewTool: React.FC = () => {
         const maxAudienceVotes = Math.max(votes.group1.audienceVotes ?? 0, votes.group2.audienceVotes ?? 0);
 
         return data.map((group, index) => (
-            <div key={group.name} className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-bold mb-2">{group.name}计算过程：</h4>
-                <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">评委得分计算：</span></p>
+            <div key={group.name} className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+                <h4 className="font-bold text-blue-900 mb-2">{group.name}计算过程：</h4>
+                <div className="space-y-2 text-sm text-blue-800">
+                    <p><span className="font-medium text-blue-900">评委得分计算：</span></p>
                     <p className="ml-4">基础分：14分</p>
                     {votes[`group${index + 1}` as keyof GroupVotes].juryVotes !== null && (
                         <p className="ml-4">
@@ -101,9 +101,9 @@ const VotePreviewTool: React.FC = () => {
                             ln(1 + {maxJuryVotes}) = {(group.评委得分 - 14).toFixed(2)}
                         </p>
                     )}
-                    <p className="ml-4">最终评委得分：{group.评委得分}分</p>
+                    <p className="ml-4 text-blue-900 font-medium">最终评委得分：{group.评委得分}分</p>
 
-                    <p className="mt-2"><span className="font-medium">观众得分计算：</span></p>
+                    <p className="mt-2"><span className="font-medium text-blue-900">观众得分计算：</span></p>
                     <p className="ml-4">基础分：6分</p>
                     {votes[`group${index + 1}` as keyof GroupVotes].audienceVotes !== null && (
                         <p className="ml-4">
@@ -112,10 +112,13 @@ const VotePreviewTool: React.FC = () => {
                             ln(1 + {maxAudienceVotes}) = {(group.观众得分 - 6).toFixed(2)}
                         </p>
                     )}
-                    <p className="ml-4">最终观众得分：{group.观众得分}分</p>
+                    <p className="ml-4 text-blue-900 font-medium">最终观众得分：{group.观众得分}分</p>
 
-                    <p className="mt-2"><span className="font-medium">总分：</span>{group.总分}分</p>
-                    <p><span className="font-medium">显示高度：</span>{group.显示高度}%</p>
+                    <div className="mt-4 pt-2 border-t border-blue-200">
+                        <p className="font-medium text-blue-900">最终结果：</p>
+                        <p className="ml-4">总分：{group.总分}分</p>
+                        <p className="ml-4">显示高度：{group.显示高度}%</p>
+                    </div>
                 </div>
             </div>
         ));
@@ -130,7 +133,7 @@ const VotePreviewTool: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700">评委投票 (0-70)</label>
                         <input
                             type="text"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={votes.group1.juryVotes === null ? '' : votes.group1.juryVotes}
                             onChange={(e) => {
                                 const value = parseInputValue(e.target.value);
@@ -148,7 +151,7 @@ const VotePreviewTool: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700">观众投票 (0-120)</label>
                         <input
                             type="text"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={votes.group1.audienceVotes === null ? '' : votes.group1.audienceVotes}
                             onChange={(e) => {
                                 const value = parseInputValue(e.target.value);
@@ -169,7 +172,7 @@ const VotePreviewTool: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700">评委投票 (0-70)</label>
                         <input
                             type="text"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={votes.group2.juryVotes === null ? '' : votes.group2.juryVotes}
                             onChange={(e) => {
                                 const value = parseInputValue(e.target.value);
@@ -187,7 +190,7 @@ const VotePreviewTool: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700">观众投票 (0-120)</label>
                         <input
                             type="text"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={votes.group2.audienceVotes === null ? '' : votes.group2.audienceVotes}
                             onChange={(e) => {
                                 const value = parseInputValue(e.target.value);
@@ -206,7 +209,7 @@ const VotePreviewTool: React.FC = () => {
 
             <div className="space-y-8">
                 <div>
-                    <h3 className="font-bold text-lg mb-4">得分图表</h3>
+                    <h3 className="font-bold text-lg mb-4">得分图表(不在前端呈现)</h3>
                     <BarChart width={600} height={400} data={calculateData()}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
